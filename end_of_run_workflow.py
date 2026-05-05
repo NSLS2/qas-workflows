@@ -5,9 +5,10 @@ from data_validation import data_validation, get_run, get_run_processed
 from xas.process import process_interpolate_bin_with_tiled
 
 # PizzaBox Adapter-specific
+from typing import Union
 from tiled.mimetypes import DEFAULT_ADAPTERS_BY_MIMETYPE
 from tiled.structures.array import ArrayStructure, StructDtype
-from tiled.structures.data_source import Asset, DataSource
+from tiled.structures.data_source import DataSource
 from tiled.catalog.orm import Node
 from tiled.adapters.array import ArrayAdapter
 from tiled.utils import path_from_uri, ensure_uri
@@ -20,6 +21,7 @@ import dask.array as da
 
 tiled_inst = "https://tiled.nsls2.bnl.gov"
 
+
 # Define custom adapters for Pizzabox data
 class PizzaBoxAdapter(ArrayAdapter):
     """Adapter for electrometer and trigger binary files from the PizzaBox system."""
@@ -27,13 +29,20 @@ class PizzaBoxAdapter(ArrayAdapter):
     @staticmethod
     def locate_files(*uris) -> tuple[str, str]:
         if len(uris) > 2:
-            raise ValueError("Expected 1 or 2 URIs: one for the .bin file (required) and one for the .txt file (optional)")
+            raise ValueError(
+                "Expected 1 or 2 URIs: one for the .bin file (required) and one for the .txt file (optional)"
+            )
 
         elif len(uris) == 2:
             uri_bin, uri_txt = uris
-            ext_bin, ext_txt = os.path.splitext(uri_bin)[1], os.path.splitext(uri_txt)[1]
+            ext_bin, ext_txt = (
+                os.path.splitext(uri_bin)[1],
+                os.path.splitext(uri_txt)[1],
+            )
             if {ext_bin, ext_txt} != {".txt", ".bin"}:
-                raise ValueError(f"Expected one .txt and one .bin file, got {ext_txt} and {ext_bin}")
+                raise ValueError(
+                    f"Expected one .txt and one .bin file, got {ext_txt} and {ext_bin}"
+                )
             # Ensure that the first uri contains the .bin file and the second uri contains the .txt file
             if (ext_bin != ".bin") and (ext_txt != ".txt"):
                 uri_bin, uri_txt = uri_txt, uri_bin
@@ -53,10 +62,9 @@ class PizzaBoxAdapter(ArrayAdapter):
 
     @staticmethod
     def read_txt_file(uri: str) -> dict:
-
         def str_to_num(s: str) -> Union[int, float, str]:
             s = s.strip()
-            if s.isdigit() or (s.startswith('-') and s[1:].isdigit()):
+            if s.isdigit() or (s.startswith("-") and s[1:].isdigit()):
                 return int(s)
             else:
                 try:
@@ -111,15 +119,30 @@ class PizzaBoxAdapter(ArrayAdapter):
             if set(memmap[:60].reshape(-1, 3)[:, 0]) == {0, 1}:  # APB trigger file
                 columns = ["timestamp", "transition"]
             else:  # APB electrometer file
-                columns = ["timestamp", "i0", "it", "ir", "iff", "aux1", "aux2", "aux3", "aux4"]
+                columns = [
+                    "timestamp",
+                    "i0",
+                    "it",
+                    "ir",
+                    "iff",
+                    "aux1",
+                    "aux2",
+                    "aux3",
+                    "aux4",
+                ]
 
-        data = da.from_array(memmap).reshape(-1, len(columns)+1)
-        ddf_ts = dask.dataframe.from_array(data[:, -2] + data[:, -1].astype('float') * 8.0051232 * 1e-9, columns=columns[:1])
+        data = da.from_array(memmap).reshape(-1, len(columns) + 1)
+        ddf_ts = dask.dataframe.from_array(
+            data[:, -2] + data[:, -1].astype("float") * 8.0051232 * 1e-9,
+            columns=columns[:1],
+        )
         ddf = dask.dataframe.from_array(data[:, :-2], columns=columns[1:])
         ddf = dask.dataframe.concat([ddf_ts, ddf], axis=1)
 
         nrows = memmap.size // (len(columns) + 1)
-        array = ddf.set_index(ddf.columns[0]).to_records(lengths=(nrows,)).reshape(-1, 1)
+        array = (
+            ddf.set_index(ddf.columns[0]).to_records(lengths=(nrows,)).reshape(-1, 1)
+        )
 
         return array
 
@@ -129,15 +152,22 @@ class PizzaBoxAdapter(ArrayAdapter):
         data_source: DataSource[ArrayStructure],
         node: Node,
     ) -> "PizzaBoxAdapter":
-
         # Load the array from binary file lazily with Dask
-        bin_uris = [ast.data_uri for ast in data_source.assets if ast.parameter == "data_uris"]
-        txt_uris = [ast.data_uri for ast in data_source.assets if ast.parameter == "metadata"]
+        bin_uris = [
+            ast.data_uri for ast in data_source.assets if ast.parameter == "data_uris"
+        ]
+        txt_uris = [
+            ast.data_uri for ast in data_source.assets if ast.parameter == "metadata"
+        ]
         if len(bin_uris) != 1 or len(txt_uris) > 1:
-            raise ValueError("Expected exactly one data_uris asset and at most one metadata asset")
+            raise ValueError(
+                "Expected exactly one data_uris asset and at most one metadata asset"
+            )
 
         structure = data_source.structure
-        assert isinstance(structure.data_type, StructDtype), "Array structure must be of StructDtype"
+        assert isinstance(structure.data_type, StructDtype), (
+            "Array structure must be of StructDtype"
+        )
         columns = [f.name for f in structure.data_type.fields]
         array = cls.read_bin_file(bin_uris[0], columns=columns)
 
@@ -161,7 +191,11 @@ class PizzaBoxAdapter(ArrayAdapter):
 
         return cls(array, structure, metadata=metadata)
 
-DEFAULT_ADAPTERS_BY_MIMETYPE.set("application/x-pizzabox-binary", lambda: PizzaBoxAdapter)
+
+DEFAULT_ADAPTERS_BY_MIMETYPE.set(
+    "application/x-pizzabox-binary", lambda: PizzaBoxAdapter
+)
+
 
 @task
 def log_completion(dry_run=False):
