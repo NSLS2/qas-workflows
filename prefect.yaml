@@ -9,8 +9,8 @@ pull:
   - prefect.deployments.steps.set_working_directory:
       directory: /repo
   - prefect.deployments.steps.git_clone:
-      repository: https://github.com/JunAishima/qas-workflows.git
-      branch: add-adapter
+      repository: https://github.com/NSLS2/qas-workflows.git
+      branch: main
 
 deployments:
   - name: qas-end-of-run-workflow-docker
@@ -24,7 +24,7 @@ deployments:
     schedule: {}
     work_pool:
       job_variables:
-        image: ghcr.io/junaishima/qas-workflows:add-adapter
+        image: ghcr.io/nsls2/qas-workflows:main
         image_pull_policy: Always
         network: slirp4netns
         volumes:
