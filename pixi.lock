@@ -437,7 +437,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/zarr-3.2.1-pyhc364b38_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zict-3.0.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
-      - pypi: git+https://github.com/NSLS2/qas-xas.git?rev=2c049cf#2c049cf125230c82d40727518754873ca54df2be
+      - pypi: git+https://github.com/NSLS2/qas-xas.git?rev=0af3ff6#0af3ff6a82155c8ed5f2b84b66ef8faab6b65ee3
       - pypi: https://files.pythonhosted.org/packages/79/b7/78129e95be6e19fa59776b613fc1709ffcd892bbea8291f92a3bae2c2a6a/bluesky_tiled_plugins-2.0.6-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/b2/9e/d410b0ff08a2519d197928afdc1aa36eb47e197f5ba683389b00e216f83c/event_model-1.24.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ce/33/7ce3f09d91a0ca5db7cca67671d865b7c8310b8b59eff287a711919641f0/mongoquery-1.4.3-py3-none-any.whl
@@ -7333,9 +7333,9 @@ packages:
   run_exports: {}
   size: 24190
   timestamp: 1779159948016
-- pypi: git+https://github.com/NSLS2/qas-xas.git?rev=2c049cf#2c049cf125230c82d40727518754873ca54df2be
+- pypi: git+https://github.com/NSLS2/qas-xas.git?rev=0af3ff6#0af3ff6a82155c8ed5f2b84b66ef8faab6b65ee3
   name: xas
-  version: 0.post99+g2c049cf
+  version: 0.post101+g0af3ff6
   requires_dist:
   - scipy>=1.17.1,<2
 - pypi: https://files.pythonhosted.org/packages/79/b7/78129e95be6e19fa59776b613fc1709ffcd892bbea8291f92a3bae2c2a6a/bluesky_tiled_plugins-2.0.6-py3-none-any.whl
